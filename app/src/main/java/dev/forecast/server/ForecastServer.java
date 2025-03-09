@@ -2,9 +2,11 @@ package dev.forecast.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletHandler;
 
 class ForecastRequest {
     private String cmd;
@@ -34,7 +36,7 @@ class ForecastRequest {
     }
 }
 
-public class Server {
+public class ForecastServer {
     protected static final Logger logger = LogManager.getLogger();
 
     public Logger getLogger() {
@@ -61,5 +63,18 @@ public class Server {
         var value = cache.getIfPresent(req.getZip());
         System.out.println("- value: " + value);
         cache.cleanUp();
+
+        Server server = new Server(8080);
+        ServletHandler handler = new ServletHandler();
+        server.setHandler(handler);
+        handler.addServletWithMapping(ForecastServlet.class, "/*");
+
+        try {
+            server.start();
+            System.out.println("Server started on port " + ((ServerConnector)server.getConnectors()[0]).getLocalPort());
+            server.join();
+        } catch (Exception e) {
+            logger.error("unable to start server: " + e.getMessage());
+        }
     }
 }
