@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 class IpResponse {
-    String ip;
+    public String ip;
 }
 
 public class ForecastServlet extends HttpServlet {
@@ -39,13 +39,6 @@ public class ForecastServlet extends HttpServlet {
         }
     }
 
-    /*
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("application/json");
-        resp.getWriter().write("{\"zip\": \"98765\", \"temperature\": 67}");
-    }*/
-
     private String getZipFromExternalIP() {
         try {
             String json = Util.httpFetch("https://api.ipify.org?format=json", null);
@@ -63,28 +56,18 @@ public class ForecastServlet extends HttpServlet {
         }
     }
 
-    private static final String[] RESP_FIELD_NAMES = {
-        "description", "name", "temp", "temp_min", "temp_max"
-    };
-
-    private ForecastResponse getResponse(String json) {
-        ForecastResponse fresponse = new ForecastResponse();
-        Map<String, String> fields = Util.getJSONFields(json, RESP_FIELD_NAMES);
-
-        fresponse.description = fields.get("description");
-        fresponse.area = fields.get("name");
-        fresponse.temp = (int)Float.parseFloat(fields.get("temp"));
-        fresponse.temp_min = (int)Float.parseFloat(fields.get("temp_min"));
-        fresponse.temp_max = (int)Float.parseFloat(fields.get("temp_max"));
-
-        return fresponse;
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // TODO: guard against accidentally/maliciously large POST bodies,
         // e.g. by reading a fixed length buffer using getInputStream()
-        String body = req.getReader().readLine();
+        String body = "";
+
+        for (;;) {
+            String line = req.getReader().readLine();
+            if (line == null) break;
+
+            body += line;
+        }
         logger.debug("POST body: " + body);
 
         try {
@@ -93,14 +76,10 @@ public class ForecastServlet extends HttpServlet {
             String json = null;
 
             if (zip == null) {
-                zip = Util.getClientIpAddress(req);
-
-                if (zip == null || Util.isIPLocal(zip)) {
-                    zip = getZipFromExternalIP();
-                }
+                zip = getZipFromExternalIP();
             }
 
-            if (zip == null) {
+            if (zip == null || zip.length() != 5) {
                 logger.error("no zip supplied, unable to determine automatically");
                 resp.setStatus(400);
                 return;
@@ -115,10 +94,11 @@ public class ForecastServlet extends HttpServlet {
                 logger.debug("- weatherReq: " + weatherReq);
 
                 json = Util.httpFetch(weatherReq, null);
-                fresponse = getResponse(json);
+                fresponse = Util.parseResponse(json);
                 fresponse.zip = zip;
-                fresponse.cached = true;
                 cache.put(zip, fresponse);
+            } else {
+                fresponse.cached = true;
             }
 
             json = Util.toJSON(fresponse);

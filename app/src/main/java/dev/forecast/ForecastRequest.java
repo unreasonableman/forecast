@@ -11,6 +11,9 @@ public class ForecastRequest {
         this.verbose = verbose;
     }
 
+    public ForecastRequest() {
+    }
+
     public String getCmd() {
         return cmd;
     }

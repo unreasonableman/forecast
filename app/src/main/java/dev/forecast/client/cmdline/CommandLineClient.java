@@ -3,8 +3,14 @@ package dev.forecast.client.cmdline;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Arrays;
+
+import dev.forecast.ForecastRequest;
+import dev.forecast.ForecastResponse;
+import dev.forecast.Util;
 
 public class CommandLineClient {
 
@@ -26,37 +32,50 @@ public class CommandLineClient {
         boolean verbose = false;
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i] == "-v") verbose = true;
+            if (args[i].equals("-v")) verbose = true;
 
-            if (args[i] == "-zip" && i + 1 < args.length) {
-                zip = args[i++];
+            if (args[i].equals("-zip") && i + 1 < args.length) {
+                zip = args[++i];
             }
 
-            if (args[i] == "-host" && i + 1 < args.length) {
-                host = args[i++];
+            if (args[i].equals("-host") && i + 1 < args.length) {
+                host = args[++i];
             }
 
-            if (args[i] == "-port" && i + 1 < args.length) {
-                try{port = Integer.parseInt(args[i++]);}
+            if (args[i].equals("-port") && i + 1 < args.length) {
+                try{port = Integer.parseInt(args[++i]);}
                 catch (NumberFormatException e) {usage();}
             }
         }
 
-        System.out.println("- host: " + host);
+        /*System.out.println("- host: " + host);
         System.out.println("- port: " + port);
         System.out.println("- command: " + command);
         System.out.println("- zip: " + zip);
-        System.out.println("- verbose: " + verbose);
+        System.out.println("- verbose: " + verbose);*/
 
         try {
-            HttpClient client = HttpClient.newBuilder().build();
-            HttpRequest request = HttpRequest.newBuilder().GET().uri(URI.create("http://localhost:8082")).build();
+            ForecastRequest freq = new ForecastRequest(command, zip, verbose);
+            String body = Util.toJSON(freq);
+            //System.out.println("- body: " + body);
+            String url = "http://" + host + ":" + port;
+            //System.out.println("- url: " + url);
 
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
+
+            HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
             if (response.statusCode() == 200) {
-                //return response.body();
+                //System.out.println("- response.body(): " + response.body());
+                ForecastResponse resp = Util.fromJSON(ForecastResponse.class, response.body());
+                System.out.println(resp.format());
             } else {
-                //return String.valueOf(response.statusCode());
+                System.err.println("* weather data retrieval failed with status code " + response.statusCode());
             }
         } catch (Exception e) {
             System.err.println("could not retrieve weather data: " + e);

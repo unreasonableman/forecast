@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Util {
-
     private static final String[] HEADERS_TO_TRY = {
         "X-Forwarded-For",
         "Proxy-Client-IP",
@@ -31,6 +30,10 @@ public class Util {
         "HTTP_FORWARDED",
         "HTTP_VIA",
         "REMOTE_ADDR"
+    };
+
+    private static final String[] RESP_FIELD_NAMES = {
+            "description", "name", "temp", "temp_min", "temp_max"
     };
 
     public static String toJSON(Object object) throws IOException{
@@ -59,7 +62,8 @@ public class Util {
             for (String n : names) {
                 JsonNode value = node.findValue(n);
                 if (value != null) {
-                    fields.put(n, value.toString());
+                    //fields.put(n, value.toString());
+                    fields.put(n, value.asText());
                 }
             }
 
@@ -67,6 +71,19 @@ public class Util {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public static ForecastResponse parseResponse(String json) {
+        ForecastResponse fresponse = new ForecastResponse();
+        Map<String, String> fields = Util.getJSONFields(json, RESP_FIELD_NAMES);
+
+        fresponse.description = fields.get("description");
+        fresponse.area = fields.get("name");
+        fresponse.temp = (int) Float.parseFloat(fields.get("temp"));
+        fresponse.temp_min = (int) Float.parseFloat(fields.get("temp_min"));
+        fresponse.temp_max = (int) Float.parseFloat(fields.get("temp_max"));
+
+        return fresponse;
     }
 
     // https://stackoverflow.com/a/56920579/7396017

@@ -9,6 +9,9 @@ public class ForecastResponse {
     public int temp_min;
     public int temp_max;
 
+    public ForecastResponse() {
+    }
+
     public String format() {
         StringBuilder sb = new StringBuilder();
 
