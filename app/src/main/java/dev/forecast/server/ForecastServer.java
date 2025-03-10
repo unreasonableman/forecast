@@ -8,33 +8,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 
-class ForecastRequest {
-    private String cmd;
-    private String zip;
-    private boolean verbose;
-
-    public ForecastRequest(String cmd, String zip, boolean verbose) {
-        this.cmd = cmd;
-        this.zip = zip;
-        this.verbose = verbose;
-    }
-
-    public String getCmd() {
-        return cmd;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public boolean getVerbose() {
-        return verbose;
-    }
-
-    public String toString() {
-        return "[request cmd: " + cmd + ", zip: " + zip + ", verbose: " + verbose + "]";
-    }
-}
+import dev.forecast.ForecastRequest;
 
 public class ForecastServer {
     protected static final Logger logger = LogManager.getLogger();
