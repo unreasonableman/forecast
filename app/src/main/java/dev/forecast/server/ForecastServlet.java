@@ -16,14 +16,21 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * The main entry point for actual application logic. Receive user reqiuests for weather
+ * data, then check if request includes a ZIP. If no ZIP is present, find user's external
+ * IP, convert to US ZIP, then query weather service.
+ */
 public class ForecastServlet extends HttpServlet {
     protected static final Logger logger = LogManager.getLogger();
+    private String serverIP = null;
 
     private static Cache<String, ForecastResponse> cache = CacheBuilder.newBuilder()
         .maximumSize(1000)
         .expireAfterWrite(30, TimeUnit.MINUTES)
         .build();
 
+    /** Handle client POST requests */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // TODO: guard against accidentally/maliciously large POST bodies,
@@ -44,7 +51,21 @@ public class ForecastServlet extends HttpServlet {
             String json = null;
 
             if (zip == null) {
-                String ip = ExternalIPService.execute();
+                String ip = req.getHeader("X-Forwarded-For");
+                logger.debug("- header ip: " + ip);
+
+                if (ip == null) {
+                    // last resort: user did not spcifiy a ZIP,
+                    // and client didn't send originating IP,
+                    // so we'll use server IP to find a ZIP
+                    if (serverIP == null) {
+                        serverIP = ExternalIPService.execute();
+                        logger.debug("- serverIP: " + serverIP);
+                    }
+
+                    ip = serverIP;
+                }
+
                 zip = IPToZIPService.execute(ip);
             }
 

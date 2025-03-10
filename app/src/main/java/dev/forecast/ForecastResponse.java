@@ -1,7 +1,8 @@
 package dev.forecast;
 
+/** Encapsulate a response from the weather service */
 public class ForecastResponse {
-    // TODO: generate autpmatically with reflection
+    // TODO: generate automatically with reflection
     public static final String[] FIELD_NAMES = {
             "description", "name", "temp", "temp_min", "temp_max"
     };
@@ -14,9 +15,16 @@ public class ForecastResponse {
     public int temp_min;
     public int temp_max;
 
+    /** Create a new instance */
     public ForecastResponse() {
     }
 
+    /**
+     * Create a formatted string representation of the instance suitable
+     * for display to the user.
+     * @param verbose Control output verbosity
+     * @return the formatted output
+     */
     public String format(boolean verbose) {
         StringBuilder sb = new StringBuilder();
 

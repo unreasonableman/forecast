@@ -6,6 +6,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 
+/**
+ * Main entry point for forecast server component. Currently configured to start on port 8080.
+ */
 public class ForecastServer {
     protected static final Logger logger = LogManager.getLogger();
 
