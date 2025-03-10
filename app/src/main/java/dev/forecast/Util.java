@@ -15,27 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 public class Util {
-    private static final String[] HEADERS_TO_TRY = {
-        "X-Forwarded-For",
-        "Proxy-Client-IP",
-        "WL-Proxy-Client-IP",
-        "HTTP_X_FORWARDED_FOR",
-        "HTTP_X_FORWARDED",
-        "HTTP_X_CLUSTER_CLIENT_IP",
-        "HTTP_CLIENT_IP",
-        "HTTP_FORWARDED_FOR",
-        "HTTP_FORWARDED",
-        "HTTP_VIA",
-        "REMOTE_ADDR"
-    };
-
-    private static final String[] RESP_FIELD_NAMES = {
-            "description", "name", "temp", "temp_min", "temp_max"
-    };
-
     public static String toJSON(Object object) throws IOException{
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         return ow.writeValueAsString(object);
@@ -45,8 +25,6 @@ public class Util {
         ObjectMapper mapper = new ObjectMapper();
         return (T) mapper.readValue(jsonString, clazz);
     }
-
-    String[] foo = new String[] {"bar"};
 
     public static String getJSONField(String json, String name) {
         Map<String, String> fields = getJSONFields(json, new String[] {name});
@@ -62,7 +40,6 @@ public class Util {
             for (String n : names) {
                 JsonNode value = node.findValue(n);
                 if (value != null) {
-                    //fields.put(n, value.toString());
                     fields.put(n, value.asText());
                 }
             }
@@ -73,36 +50,17 @@ public class Util {
         }
     }
 
-    public static ForecastResponse parseResponse(String json, boolean verbose) {
+    public static ForecastResponse parseResponse(String json) {
         ForecastResponse fresponse = new ForecastResponse();
-        Map<String, String> fields = Util.getJSONFields(json, RESP_FIELD_NAMES);
+        Map<String, String> fields = Util.getJSONFields(json, ForecastResponse.FIELD_NAMES);
 
         fresponse.area = fields.get("name");
         fresponse.temp = (int) Float.parseFloat(fields.get("temp"));
-
-        if (verbose) {
-            fresponse.description = fields.get("description");
-            fresponse.temp_min = (int) Float.parseFloat(fields.get("temp_min"));
-            fresponse.temp_max = (int) Float.parseFloat(fields.get("temp_max"));
-        }
+        fresponse.description = fields.get("description");
+        fresponse.temp_min = (int) Float.parseFloat(fields.get("temp_min"));
+        fresponse.temp_max = (int) Float.parseFloat(fields.get("temp_max"));
 
         return fresponse;
-    }
-
-    // https://stackoverflow.com/a/56920579/7396017
-    public static String getClientIpAddress(HttpServletRequest request) {
-        for (String header : HEADERS_TO_TRY) {
-            String ip = request.getHeader(header);
-            if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
-                return ip;
-            }
-        }
-
-        return request.getRemoteAddr();
-    }
-
-    public static boolean isIPLocal(String ip) {
-        return ip.startsWith("192.") || ip.startsWith("127.0.0.1") || ip.startsWith("localhost");
     }
 
     public static String httpFetch(String url, String body) throws Exception {

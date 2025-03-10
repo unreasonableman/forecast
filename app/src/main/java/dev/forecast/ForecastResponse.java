@@ -1,6 +1,11 @@
 package dev.forecast;
 
 public class ForecastResponse {
+    // TODO: generate autpmatically with reflection
+    public static final String[] FIELD_NAMES = {
+            "description", "name", "temp", "temp_min", "temp_max"
+    };
+
     public String description;
     public boolean cached;
     public String zip;

@@ -18,21 +18,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class ForecastServlet extends HttpServlet {
     protected static final Logger logger = LogManager.getLogger();
-    private final String WEATHER_REQ = "https://api.openweathermap.org/data/2.5/weather?zip=%s,us&appid=%s&units=imperial";
-    private String apiKey = null;
 
     private static Cache<String, ForecastResponse> cache = CacheBuilder.newBuilder()
         .maximumSize(1000)
         .expireAfterWrite(30, TimeUnit.MINUTES)
         .build();
-
-    public ForecastServlet() {
-        apiKey = System.getenv("OPEN_WEATHER_KEY");
-
-        if (apiKey == null) {
-            throw new RuntimeException("open weather api key not founf");
-        }
-    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -69,11 +59,7 @@ public class ForecastServlet extends HttpServlet {
             ForecastResponse fresponse = cache.getIfPresent(zip);
 
             if (fresponse == null) {
-                String weatherReq = String.format(WEATHER_REQ, zip, apiKey);
-                logger.debug("- weatherReq: " + weatherReq);
-
-                json = Util.httpFetch(weatherReq, null);
-                fresponse = Util.parseResponse(json, frequest.verbose);
+                fresponse = WeatherService.execute(zip);
                 fresponse.zip = zip;
                 cache.put(zip, fresponse);
             } else {

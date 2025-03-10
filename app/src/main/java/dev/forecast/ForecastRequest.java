@@ -14,18 +14,6 @@ public class ForecastRequest {
     public ForecastRequest() {
     }
 
-    public String getCmd() {
-        return cmd;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public boolean getVerbose() {
-        return verbose;
-    }
-
     public String toString() {
         return "[request cmd: " + cmd + ", zip: " + zip + ", verbose: " + verbose + "]";
     }
