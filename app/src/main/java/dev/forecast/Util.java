@@ -73,15 +73,18 @@ public class Util {
         }
     }
 
-    public static ForecastResponse parseResponse(String json) {
+    public static ForecastResponse parseResponse(String json, boolean verbose) {
         ForecastResponse fresponse = new ForecastResponse();
         Map<String, String> fields = Util.getJSONFields(json, RESP_FIELD_NAMES);
 
-        fresponse.description = fields.get("description");
         fresponse.area = fields.get("name");
         fresponse.temp = (int) Float.parseFloat(fields.get("temp"));
-        fresponse.temp_min = (int) Float.parseFloat(fields.get("temp_min"));
-        fresponse.temp_max = (int) Float.parseFloat(fields.get("temp_max"));
+
+        if (verbose) {
+            fresponse.description = fields.get("description");
+            fresponse.temp_min = (int) Float.parseFloat(fields.get("temp_min"));
+            fresponse.temp_max = (int) Float.parseFloat(fields.get("temp_max"));
+        }
 
         return fresponse;
     }

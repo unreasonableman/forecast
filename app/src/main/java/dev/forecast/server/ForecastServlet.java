@@ -1,7 +1,6 @@
 package dev.forecast.server;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,42 +16,21 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-class IpResponse {
-    public String ip;
-}
-
 public class ForecastServlet extends HttpServlet {
     protected static final Logger logger = LogManager.getLogger();
     private final String WEATHER_REQ = "https://api.openweathermap.org/data/2.5/weather?zip=%s,us&appid=%s&units=imperial";
     private String apiKey = null;
 
     private static Cache<String, ForecastResponse> cache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(30, TimeUnit.MINUTES)
-            .build();
+        .maximumSize(1000)
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build();
 
     public ForecastServlet() {
         apiKey = System.getenv("OPEN_WEATHER_KEY");
 
         if (apiKey == null) {
             throw new RuntimeException("open weather api key not founf");
-        }
-    }
-
-    private String getZipFromExternalIP() {
-        try {
-            String json = Util.httpFetch("https://api.ipify.org?format=json", null);
-            logger.debug("- json: " + json);
-            IpResponse ipResponse = Util.fromJSON(IpResponse.class, json);
-            logger.debug("- ipResponse.ip: " + ipResponse.ip);
-            json = Util.httpFetch("http://ip-api.com/json/" + ipResponse.ip, "");
-            logger.debug("- json: " + json);
-            String zip = Util.getJSONField(json, "zip");
-            logger.debug("- zip: " + zip);
-            return zip;
-        } catch (Exception e) {
-            logger.error("could not get zip from external IP: " + e);
-            return null;
         }
     }
 
@@ -76,7 +54,8 @@ public class ForecastServlet extends HttpServlet {
             String json = null;
 
             if (zip == null) {
-                zip = getZipFromExternalIP();
+                String ip = ExternalIPService.execute();
+                zip = IPToZIPService.execute(ip);
             }
 
             if (zip == null || zip.length() != 5) {
@@ -94,7 +73,7 @@ public class ForecastServlet extends HttpServlet {
                 logger.debug("- weatherReq: " + weatherReq);
 
                 json = Util.httpFetch(weatherReq, null);
-                fresponse = Util.parseResponse(json);
+                fresponse = Util.parseResponse(json, frequest.verbose);
                 fresponse.zip = zip;
                 cache.put(zip, fresponse);
             } else {

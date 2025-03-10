@@ -12,11 +12,11 @@ public class ForecastResponse {
     public ForecastResponse() {
     }
 
-    public String format() {
+    public String format(boolean verbose) {
         StringBuilder sb = new StringBuilder();
 
         if (cached) {
-            sb.append("cached ");
+            sb.append("_cached_ ");
         }
 
         sb.append("weather data for ZIP ");
@@ -24,15 +24,24 @@ public class ForecastResponse {
         sb.append(" (");
         sb.append(area);
         sb.append(")\n");
-        sb.append("summary: ");
-        sb.append(description);
-        sb.append("temp/min/max: ");
-        sb.append(temp);
-        sb.append("/");
-        sb.append(temp_min);
-        sb.append("/");
-        sb.append(temp_max);
-        sb.append("\n");
+
+        if (verbose) {
+            sb.append("summary: ");
+            sb.append(description);
+            sb.append("\n");
+
+            sb.append("temp/min/max: ");
+            sb.append(temp);
+            sb.append("F/");
+            sb.append(temp_min);
+            sb.append("F/");
+            sb.append(temp_max);
+            sb.append("F\n");
+        } else {
+            sb.append("temp: ");
+            sb.append(temp);
+            sb.append("F");
+        }
 
         return sb.toString();
     }

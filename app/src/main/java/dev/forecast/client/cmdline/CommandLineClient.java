@@ -6,7 +6,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.Arrays;
 
 import dev.forecast.ForecastRequest;
 import dev.forecast.ForecastResponse;
@@ -48,18 +47,10 @@ public class CommandLineClient {
             }
         }
 
-        /*System.out.println("- host: " + host);
-        System.out.println("- port: " + port);
-        System.out.println("- command: " + command);
-        System.out.println("- zip: " + zip);
-        System.out.println("- verbose: " + verbose);*/
-
         try {
             ForecastRequest freq = new ForecastRequest(command, zip, verbose);
             String body = Util.toJSON(freq);
-            //System.out.println("- body: " + body);
             String url = "http://" + host + ":" + port;
-            //System.out.println("- url: " + url);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -71,9 +62,8 @@ public class CommandLineClient {
             HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                //System.out.println("- response.body(): " + response.body());
                 ForecastResponse resp = Util.fromJSON(ForecastResponse.class, response.body());
-                System.out.println(resp.format());
+                System.out.println(resp.format(verbose));
             } else {
                 System.err.println("* weather data retrieval failed with status code " + response.statusCode());
             }
