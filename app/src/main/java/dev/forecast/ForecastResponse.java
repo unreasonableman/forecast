@@ -1,44 +1,20 @@
 package dev.forecast;
 
 public class ForecastResponse {
-    private String description;
-    private boolean cached;
-    private String zip;
-    private String area;
-    private int temp;
-    private int temp_min;
-    private int temp_max;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public boolean getCached() {
-        return cached;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public String getArea() {
-        return area;
-    }
-
-    public int getTemp() {
-        return temp;
-    }
-
-    public int getTempMin() {
-        return temp_min;
-    }
-
-    public int getTempMax() {
-        return temp_max;
-    }
+    public String description;
+    public boolean cached;
+    public String zip;
+    public String area;
+    public int temp;
+    public int temp_min;
+    public int temp_max;
 
     public String format() {
         StringBuilder sb = new StringBuilder();
+
+        if (cached) {
+            sb.append("cached ");
+        }
 
         sb.append("weather data for ZIP ");
         sb.append(zip);
@@ -47,7 +23,7 @@ public class ForecastResponse {
         sb.append(")\n");
         sb.append("summary: ");
         sb.append(description);
-        sb.append("temp/nin/max: ");
+        sb.append("temp/min/max: ");
         sb.append(temp);
         sb.append("/");
         sb.append(temp_min);

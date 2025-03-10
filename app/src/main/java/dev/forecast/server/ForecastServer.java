@@ -2,6 +2,9 @@ package dev.forecast.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.cache.CacheBuilder;
+
+import java.util.concurrent.TimeUnit;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Server;
@@ -30,8 +33,9 @@ public class ForecastServer {
         }
 
         var cache = CacheBuilder.newBuilder()
-                                .maximumSize(1000)
-                                .build();
+            .maximumSize(1000)
+            .expireAfterWrite(30, TimeUnit.MINUTES)
+            .build();
 
         cache.put(req.getZip(), req);
         var value = cache.getIfPresent(req.getZip());
