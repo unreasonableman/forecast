@@ -83,6 +83,7 @@ public class CommandLineClient {
                 System.out.println(resp.format(verbose));
             } else {
                 System.err.println("* weather data retrieval failed with status code " + response.statusCode());
+                System.err.println("* please confirm ZIP code is valid");
             }
         } catch (Exception e) {
             System.err.println("could not retrieve weather data: " + e);

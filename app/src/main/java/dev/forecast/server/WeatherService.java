@@ -30,13 +30,13 @@ public class WeatherService {
 
         try {
             String weatherReq = String.format(WEATHER_REQ, zip, apiKey);
-            //logger.debug("- weatherReq: " + weatherReq);
+            logger.debug("- weatherReq: " + weatherReq);
 
             String json = Util.httpFetch(weatherReq, null);
-            //logger.debug("- json: " + json);
+            logger.debug("- json: " + json);
             return Util.parseResponse(json);
         } catch (Exception e) {
-            logger.error("could not get zip IP: " + e);
+            logger.error("could not get weather for ZIP: " + e);
             return null;
         }
     }

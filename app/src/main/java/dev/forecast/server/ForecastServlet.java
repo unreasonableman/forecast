@@ -81,6 +81,12 @@ public class ForecastServlet extends HttpServlet {
 
             if (fresponse == null) {
                 fresponse = WeatherService.execute(zip);
+
+                if (fresponse == null) {
+                    resp.setStatus(400);
+                    return;
+                }
+
                 fresponse.zip = zip;
                 cache.put(zip, fresponse);
             } else {

@@ -11,12 +11,17 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 /** Class for a few utility functions, predominantly centered around JSON processing. */
 public class Util {
+    protected static final Logger logger = LogManager.getLogger();
+
     /**
      * Convert a java object to its JSON representation.
      * @param object The object to convert
